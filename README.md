@@ -27,5 +27,3 @@ https://www.youtube.com/watch?v=bRWT_sbzGds
 
 <img width="1440" alt="Screenshot 2020-05-16 at 03 31 17" src="https://user-images.githubusercontent.com/40724965/82109796-3d900480-9739-11ea-9cc6-b5977d34e955.png">
 
-+ The Lambda send messages to the Cloud
-
