@@ -23,6 +23,7 @@ from PIL import Image
 from tflite_runtime.interpreter import Interpreter
 from annotation import Annotator
 import os
+import boto3
 
 
 
@@ -112,20 +113,20 @@ label = os.path.join(model_resource_path, 'coco_labels.txt')
 interpreter = Interpreter(model)
 labels = load_labels(label)
 threshold = 0.5
- 
+__TableName__ = "myDatabase"
 
 def greengrass_app():
     try:
         client = greengrasssdk.client('iot-data')
+        client1 = boto3.client('dynamodb')
+
         iot_topic = 'raspberry/out'
         client.publish(topic=iot_topic, payload='Loading object detection model')
-        
-        #test = labels[0]
-        
-        
-        #client.publish(topic=iot_topic, payload='first item :'+ test +'!!!')
-        
-        
+
+        DB = boto3.resource('dynamodb')
+        table = DB.Table(__TableName__)
+
+       
         interpreter.allocate_tensors()
         _, input_height, input_width, _ = interpreter.get_input_details()[0]['shape']
         # Do inference until the lambda is killed.
@@ -158,6 +159,23 @@ def greengrass_app():
                 #print(f" Prediction result : {nbr}")
                 p = str(nbr)
                 client.publish(topic=iot_topic, payload='Nombre de personne détecter :'+ p +'!!!')
+
+                response = table.update_item(
+                  Key ={
+                     "id":0
+                  },
+                  
+                  UpdateExpression='SET #ts = :val1',
+                  ExpressionAttributeValues={
+                      ":val1": p
+                  },
+                  ExpressionAttributeNames={
+                      "#ts": "value"
+                  }  
+                )
+
+
+
             except Exception as e:
               client.publish(topic=iot_topic, payload='Error inside Pica ')
     except Exception as e:
